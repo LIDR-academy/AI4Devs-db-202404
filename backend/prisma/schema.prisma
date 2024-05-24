@@ -24,6 +24,7 @@ model Candidate {
   educations        Education[]
   workExperiences   WorkExperience[]
   resumes           Resume[]
+  applications      Application[]     // Relación inversa agregada aquí
 }
 
 model Education {
@@ -54,4 +55,109 @@ model Resume {
   uploadDate  DateTime
   candidateId Int
   candidate   Candidate @relation(fields: [candidateId], references: [id])
+}
+
+// Prisma Schema Enterga Sesión 7
+
+model Company {
+  id        Int       @id @default(autoincrement())
+  name      String
+  employees Employee[]
+  positions Position[]
+}
+
+model Employee {
+  id         Int        @id @default(autoincrement())
+  company_id Int
+  company    Company    @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name       String
+  email      String     @unique
+  role       String
+  is_active  Boolean
+  interviews Interview[]
+}
+
+model InterviewFlow {
+  id             Int            @id @default(autoincrement())
+  description    String
+  interviewSteps InterviewStep[]
+  positions      Position[]
+}
+
+model InterviewType {
+  id             Int            @id @default(autoincrement())
+  name           String
+  description    String
+  interviewSteps InterviewStep[]
+}
+
+model Position {
+  id                Int          @id @default(autoincrement())
+  company_id        Int
+  interview_flow_id Int
+  company           Company      @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  interviewFlow     InterviewFlow @relation(fields: [interview_flow_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  title             String
+  description       String
+  status            String
+  is_visible        Boolean
+  location          String?
+  job_description   String?
+  requirements      String?
+  responsibilities  String?
+  salary_min        Float?
+  salary_max        Float?
+  employment_type   String?
+  benefits          String?
+  company_description String?
+  application_deadline DateTime?
+  contact_info      String?
+  applications      Application[]
+
+  @@index([company_id, is_visible], name: "idx_position_company_id_visible")
+}
+
+model InterviewStep {
+  id               Int           @id @default(autoincrement())
+  interview_flow_id Int
+  interview_type_id Int
+  interviewFlow    InterviewFlow @relation(fields: [interview_flow_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  interviewType    InterviewType @relation(fields: [interview_type_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name             String
+  order_index      Int
+  interviews       Interview[]
+
+  @@index([interview_flow_id, interview_type_id], name: "idx_interview_step_flow_type")
+}
+
+model Application {
+  id            Int        @id @default(autoincrement())
+  position_id   Int
+  candidate_id  Int
+  position      Position   @relation(fields: [position_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  candidate     Candidate  @relation(fields: [candidate_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  application_date DateTime
+  status        String
+  notes         String?
+  interviews    Interview[]
+
+  @@index([position_id, candidate_id], name: "idx_application_position_candidate")
+  @@index([status], name: "idx_application_status")
+}
+
+model Interview {
+  id               Int          @id @default(autoincrement())
+  application_id   Int
+  interview_step_id Int
+  employee_id      Int
+  application      Application  @relation(fields: [application_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  interviewStep    InterviewStep @relation(fields: [interview_step_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  employee         Employee     @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  interview_date   DateTime
+  result           String?
+  score            Int?
+  notes            String?
+
+  @@index([application_id], name: "idx_interview_application_id")
+  @@index([interview_step_id, employee_id], name: "idx_interview_step_employee")
 }
