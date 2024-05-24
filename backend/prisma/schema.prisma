@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// schema.prisma
 
 generator client {
   provider      = "prisma-client-js"
@@ -24,6 +20,7 @@ model Candidate {
   educations        Education[]
   workExperiences   WorkExperience[]
   resumes           Resume[]
+  applications      Application[]
 }
 
 model Education {
@@ -54,4 +51,92 @@ model Resume {
   uploadDate  DateTime
   candidateId Int
   candidate   Candidate @relation(fields: [candidateId], references: [id])
+}
+
+model Company {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+}
+
+model Employee {
+  id         Int     @id @default(autoincrement())
+  company_id Int
+  name       String  @db.VarChar(255)
+  email      String  @db.VarChar(255)
+  role       String  @db.VarChar(255)
+  is_active  Boolean
+  company    Company @relation(fields: [company_id], references: [id])
+}
+
+model Position {
+  id                  Int          @id @default(autoincrement())
+  company_id          Int
+  interview_flow_id   Int
+  title               String       @db.VarChar(255)
+  description         String       @db.VarChar(1000)
+  status              String       @db.VarChar(50)
+  is_visible          Boolean
+  location            String       @db.VarChar(255)
+  job_description     String       @db.VarChar(1000)
+  requirements        String       @db.VarChar(1000)
+  responsibilities    String       @db.VarChar(1000)
+  salary_min          Float
+  salary_max          Float
+  employment_type     String       @db.VarChar(50)
+  benefits            String       @db.VarChar(1000)
+  company_description String       @db.VarChar(1000)
+  application_deadline DateTime
+  contact_info        String       @db.VarChar(255)
+  company             Company      @relation(fields: [company_id], references: [id])
+  interview_flow      InterviewFlow @relation(fields: [interview_flow_id], references: [id])
+  applications        Application[]
+}
+
+model InterviewFlow {
+  id          Int             @id @default(autoincrement())
+  description String          @db.VarChar(255)
+  steps       InterviewStep[]
+}
+
+model InterviewStep {
+  id                 Int            @id @default(autoincrement())
+  interview_flow_id  Int
+  interview_type_id  Int
+  name               String         @db.VarChar(255)
+  order_index        Int
+  interview_type     InterviewType  @relation(fields: [interview_type_id], references: [id])
+  interviews         Interview[]
+}
+
+model InterviewType {
+  id          Int            @id @default(autoincrement())
+  name        String         @db.VarChar(255)
+  description String         @db.VarChar(1000)
+  steps       InterviewStep[]
+}
+
+model Application {
+  id              Int        @id @default(autoincrement())
+  position_id     Int
+  candidate_id    Int
+  application_date DateTime
+  status          String     @db.VarChar(255)
+  notes           String     @db.VarChar(1000)
+  position        Position   @relation(fields: [position_id], references: [id])
+  candidate       Candidate  @relation(fields: [candidate_id], references: [id])
+  interviews      Interview[]
+}
+
+model Interview {
+  id                Int        @id @default(autoincrement())
+  application_id    Int
+  interview_step_id Int
+  employee_id       Int
+  interview_date    DateTime
+  result            String     @db.VarChar(255)
+  score             Int
+  notes             String     @db.VarChar(1000)
+  application       Application @relation(fields: [application_id], references: [id])
+  interview_step    InterviewStep @relation(fields: [interview_step_id], references: [id])
+  employee          Employee   @relation(fields: [employee_id], references: [id])
 }
