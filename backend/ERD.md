@@ -68,6 +68,31 @@ CANDIDATE {
     string phone
     string address
 }
+EDUCATION {
+    int id PK
+    string institution
+    string title
+    date startDate
+    date endDate
+    int candidateId FK
+}
+WORK_EXPERIENCE {
+    int id PK
+    string company
+    string position
+    string description
+    date startDate
+    date endDate
+    int candidateId FK
+    int company_id FK
+}
+RESUME {
+    int id PK
+    string filePath
+    string fileType
+    date uploadDate
+    int candidateId FK
+}
 APPLICATION {
     int id PK
     int position_id FK
@@ -100,4 +125,8 @@ CANDIDATE ||--o{ APPLICATION : submits
 APPLICATION ||--o{ INTERVIEW : has
 INTERVIEW ||--|| INTERVIEW_STEP : consists_of
 EMPLOYEE ||--o{ INTERVIEW : conducts
+CANDIDATE ||--o{ EDUCATION : has
+CANDIDATE ||--o{ WORK_EXPERIENCE : has
+CANDIDATE ||--o{ RESUME : has
+COMPANY ||--o{ WORK_EXPERIENCE : relates_to
 ```
