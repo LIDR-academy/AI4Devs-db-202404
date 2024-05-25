@@ -16,6 +16,9 @@ POSITION {
     int id PK
     int company_id FK
     int interview_flow_id FK
+    int salary_range_id FK
+    int benefit_id FK
+    int company_description_id FK
     string title
     text description
     string status
@@ -24,13 +27,22 @@ POSITION {
     text job_description
     text requirements
     text responsibilities
-    numeric salary_min
-    numeric salary_max
-    string employment_type
-    text benefits
-    text company_description
     date application_deadline
     string contact_info
+}
+SALARY_RANGE {
+    int id PK
+    numeric min_salary
+    numeric max_salary
+    string employment_type
+}
+BENEFIT {
+    int id PK
+    text benefit_description
+}
+COMPANY_DESCRIPTION {
+    int id PK
+    text description
 }
 INTERVIEW_FLOW {
     int id PK
@@ -78,6 +90,9 @@ INTERVIEW {
 COMPANY ||--o{ EMPLOYEE : employs
 COMPANY ||--o{ POSITION : offers
 POSITION ||--|| INTERVIEW_FLOW : assigns
+POSITION ||--|| SALARY_RANGE : has
+POSITION ||--|| BENEFIT : offers
+POSITION ||--|| COMPANY_DESCRIPTION : describes
 INTERVIEW_FLOW ||--o{ INTERVIEW_STEP : contains
 INTERVIEW_STEP ||--|| INTERVIEW_TYPE : uses
 POSITION ||--o{ APPLICATION : receives
