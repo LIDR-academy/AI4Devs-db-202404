@@ -14,6 +14,97 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Company {
+  id              Int              @id @default(autoincrement())
+  name            String           @db.VarChar(100)
+  employees       Employee[]
+  positions       Position[]
+  workExperiences WorkExperience[]
+}
+
+model Employee {
+  id         Int         @id @default(autoincrement())
+  companyId  Int
+  name       String      @db.VarChar(100)
+  email      String      @unique @db.VarChar(255)
+  role       String      @db.VarChar(50)
+  isActive   Boolean
+  company    Company     @relation(fields: [companyId], references: [id])
+  interviews Interview[]
+}
+
+model Position {
+  id                   Int                @id @default(autoincrement())
+  companyId            Int
+  interviewFlowId      Int                @unique
+  salaryRangeId        Int                @unique
+  benefitId            Int                @unique
+  companyDescriptionId Int                @unique
+  title                String             @db.VarChar(100)
+  description          String             @db.Text
+  status               String             @db.VarChar(50)
+  isVisible            Boolean
+  location             String             @db.VarChar(100)
+  jobDescription       String             @db.Text
+  requirements         String             @db.Text
+  responsibilities     String             @db.Text
+  applicationDeadline  DateTime
+  contactInfo          String             @db.VarChar(100)
+  company              Company            @relation(fields: [companyId], references: [id])
+  interviewFlow        InterviewFlow      @relation(fields: [interviewFlowId], references: [id])
+  salaryRange          SalaryRange        @relation(fields: [salaryRangeId], references: [id])
+  benefit              Benefit            @relation(fields: [benefitId], references: [id])
+  companyDescription   CompanyDescription @relation(fields: [companyDescriptionId], references: [id])
+  applications         Application[]
+
+  @@index([status])
+}
+
+model SalaryRange {
+  id             Int       @id @default(autoincrement())
+  minSalary      Float
+  maxSalary      Float
+  employmentType String    @db.VarChar(50)
+  position       Position?
+}
+
+model Benefit {
+  id                 Int       @id @default(autoincrement())
+  benefitDescription String    @db.Text
+  position           Position?
+}
+
+model CompanyDescription {
+  id          Int       @id @default(autoincrement())
+  description String    @db.Text
+  position    Position?
+}
+
+model InterviewFlow {
+  id          Int             @id @default(autoincrement())
+  description String          @db.Text
+  position    Position?
+  steps       InterviewStep[]
+}
+
+model InterviewStep {
+  id              Int           @id @default(autoincrement())
+  interviewFlowId Int
+  interviewTypeId Int           @unique
+  name            String        @db.VarChar(100)
+  orderIndex      Int
+  interviewFlow   InterviewFlow @relation(fields: [interviewFlowId], references: [id])
+  interviewType   InterviewType @relation(fields: [interviewTypeId], references: [id])
+  interviews      Interview[]
+}
+
+model InterviewType {
+  id          Int            @id @default(autoincrement())
+  name        String         @db.VarChar(100)
+  description String         @db.Text
+  steps       InterviewStep?
+}
+
 model Candidate {
   id              Int              @id @default(autoincrement())
   firstName       String           @db.VarChar(100)
@@ -24,6 +115,7 @@ model Candidate {
   educations      Education[]
   workExperiences WorkExperience[]
   resumes         Resume[]
+  applications    Application[]
 }
 
 model Education {
@@ -38,13 +130,15 @@ model Education {
 
 model WorkExperience {
   id          Int       @id @default(autoincrement())
-  company     String    @db.VarChar(100)
+  companyName String?   @db.VarChar(100)
   position    String    @db.VarChar(100)
   description String?   @db.VarChar(200)
   startDate   DateTime
   endDate     DateTime?
   candidateId Int
   candidate   Candidate @relation(fields: [candidateId], references: [id])
+  companyId   Int?
+  company     Company?  @relation(fields: [companyId], references: [id])
 }
 
 model Resume {
@@ -54,4 +148,32 @@ model Resume {
   uploadDate  DateTime
   candidateId Int
   candidate   Candidate @relation(fields: [candidateId], references: [id])
+}
+
+model Application {
+  id              Int         @id @default(autoincrement())
+  positionId      Int
+  candidateId     Int
+  applicationDate DateTime
+  status          String      @db.VarChar(50)
+  notes           String      @db.Text
+  position        Position    @relation(fields: [positionId], references: [id])
+  candidate       Candidate   @relation(fields: [candidateId], references: [id])
+  interviews      Interview[]
+
+  @@index([status])
+}
+
+model Interview {
+  id              Int           @id @default(autoincrement())
+  applicationId   Int
+  interviewStepId Int
+  employeeId      Int
+  interviewDate   DateTime
+  result          String        @db.VarChar(50)
+  score           Int
+  notes           String        @db.Text
+  application     Application   @relation(fields: [applicationId], references: [id])
+  interviewStep   InterviewStep @relation(fields: [interviewStepId], references: [id])
+  employee        Employee      @relation(fields: [employeeId], references: [id])
 }
