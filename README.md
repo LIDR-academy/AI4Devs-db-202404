@@ -110,11 +110,11 @@ Para generar la base de datos utilizando Prisma, sigue estos pasos:
 
 1. Asegúrate de que el archivo `.env` en el directorio raíz del backend contenga la variable `DATABASE_URL` con la cadena de conexión correcta a tu base de datos PostgreSQL. Si no te funciona, prueba a reemplazar la URL completa directamente en `schema.prisma`, en la variable `url`.
 
-2. Abre una terminal y navega al directorio del backend donde se encuentra el archivo `schema.prisma`.
+2. Abre una terminal y navega al directorio raíz del proyecto.
 
 3. Ejecuta el siguiente comando para aplicar las migraciones a tu base de datos:
 ```
-npx prisma migrate dev
+npx prisma migrate dev --schema backend/prisma/schema.prisma
 ```
 
 Una vez has dado todos los pasos, deberías poder guardar nuevos candidatos, tanto via web, como via API, y verlos en la base de datos.
