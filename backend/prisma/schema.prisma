@@ -14,44 +14,141 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Candidate {
+model candidate {
   id                Int               @id @default(autoincrement())
-  firstName         String            @db.VarChar(100)
-  lastName          String            @db.VarChar(100)
+  first_name        String            @db.VarChar(100)
+  last_name         String            @db.VarChar(100)
   email             String            @unique @db.VarChar(255)
   phone             String?           @db.VarChar(15)
   address           String?           @db.VarChar(100)
-  educations        Education[]
-  workExperiences   WorkExperience[]
-  resumes           Resume[]
+  educations        education[]
+  work_experiences  work_experience[]
+  resumes           resume[]
+  applications      application[]
 }
 
-model Education {
+model education {
   id            Int       @id @default(autoincrement())
   institution   String    @db.VarChar(100)
   title         String    @db.VarChar(250)
-  startDate     DateTime
-  endDate       DateTime?
-  candidateId   Int
-  candidate     Candidate @relation(fields: [candidateId], references: [id])
+  start_date    DateTime
+  end_date      DateTime?
+  candidate_id  Int
+  candidate     candidate @relation(fields: [candidate_id], references: [id], onDelete: Cascade)
 }
 
-model WorkExperience {
-  id          Int       @id @default(autoincrement())
-  company     String    @db.VarChar(100)
-  position    String    @db.VarChar(100)
-  description String?   @db.VarChar(200)
-  startDate   DateTime
-  endDate     DateTime?
-  candidateId Int
-  candidate   Candidate @relation(fields: [candidateId], references: [id])
+model work_experience {
+  id            Int       @id @default(autoincrement())
+  company       String    @db.VarChar(100)
+  position      String    @db.VarChar(100)
+  description   String?   @db.VarChar(200)
+  start_date    DateTime
+  end_date      DateTime?
+  candidate_id  Int
+  candidate     candidate @relation(fields: [candidate_id], references: [id], onDelete: Cascade)
 }
 
-model Resume {
-  id          Int       @id @default(autoincrement())
-  filePath    String    @db.VarChar(500)
-  fileType    String    @db.VarChar(50)
-  uploadDate  DateTime
-  candidateId Int
-  candidate   Candidate @relation(fields: [candidateId], references: [id])
+model resume {
+  id            Int       @id @default(autoincrement())
+  file_path     String    @db.VarChar(500)
+  file_type     String    @db.VarChar(50)
+  upload_date   DateTime
+  candidate_id  Int
+  candidate     candidate @relation(fields: [candidate_id], references: [id], onDelete: Cascade)
+}
+
+model company {
+  id        Int        @id @default(autoincrement())
+  name      String
+  employees employee[]
+  positions position[]
+}
+
+model employee {
+  id         Int        @id @default(autoincrement())
+  company_id Int
+  company    company    @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  name       String
+  email      String
+  role       String
+  is_active  Boolean
+  interviews interview[]
+  @@unique([email, company_id])
+  @@index([email])
+}
+
+model position {
+  id                  Int           @id @default(autoincrement())
+  company_id          Int
+  interview_flow_id   Int           @unique
+  company             company       @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  interview_flow      interview_flow @relation(fields: [interview_flow_id], references: [id], onDelete: Cascade)
+  title               String
+  description         String
+  status              String
+  is_visible          Boolean
+  location            String
+  job_description     String
+  requirements        String
+  responsibilities    String
+  salary_min          Float
+  salary_max          Float
+  employment_type     String
+  benefits            String
+  company_description String
+  application_deadline DateTime
+  contact_info        String
+  applications        application[]
+  @@index([title])
+}
+
+model interview_flow {
+  id              Int             @id @default(autoincrement())
+  description     String
+  interview_steps interview_step[]
+  position        position?
+}
+
+model interview_step {
+  id                Int            @id @default(autoincrement())
+  interview_flow_id Int
+  interview_type_id Int
+  interview_flow    interview_flow @relation(fields: [interview_flow_id], references: [id], onDelete: Cascade)
+  interview_type    interview_type @relation(fields: [interview_type_id], references: [id], onDelete: Cascade)
+  name              String
+  order_index       Int
+  interviews        interview[]
+}
+
+model interview_type {
+  id              Int             @id @default(autoincrement())
+  name            String
+  description     String
+  interview_steps interview_step[]
+}
+
+model application {
+  id              Int            @id @default(autoincrement())
+  position_id     Int
+  candidate_id    Int
+  position        position       @relation(fields: [position_id], references: [id], onDelete: Cascade)
+  candidate       candidate      @relation(fields: [candidate_id], references: [id], onDelete: Cascade)
+  application_date DateTime
+  status          String
+  notes           String
+  interviews      interview[]
+}
+
+model interview {
+  id               Int            @id @default(autoincrement())
+  application_id   Int
+  interview_step_id Int
+  employee_id      Int
+  application      application    @relation(fields: [application_id], references: [id], onDelete: Cascade)
+  interview_step   interview_step @relation(fields: [interview_step_id], references: [id], onDelete: Cascade)
+  employee         employee       @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  interview_date   DateTime
+  result           String
+  score            Int
+  notes            String
 }
