@@ -24,6 +24,7 @@ model Candidate {
   educations        Education[]
   workExperiences   WorkExperience[]
   resumes           Resume[]
+  applications     Application[]
 }
 
 model Education {
@@ -54,4 +55,97 @@ model Resume {
   uploadDate  DateTime
   candidateId Int
   candidate   Candidate @relation(fields: [candidateId], references: [id])
+}
+
+model Company {
+  id                 Int        @id @default(autoincrement())
+  name               String
+  companyDescription String?
+  employees          Employee[]
+  positions          Position[]
+}
+
+model Employee {
+  id           Int          @id @default(autoincrement())
+  companyId    Int
+  company      Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name         String
+  email        String       @unique
+  role         String
+  isActive     Boolean
+  interviews   Interview[]
+}
+
+model Position {
+  id                  Int             @id @default(autoincrement())
+  companyId           Int
+  company             Company         @relation(fields: [companyId], references: [id])
+  interviewFlowId     Int
+  interviewFlow       InterviewFlow   @relation(fields: [interviewFlowId], references: [id])
+  title               String
+  description         String
+  status              String
+  isVisible           Boolean
+  location            String
+  jobDescription      String
+  requirements        String
+  responsibilities    String
+  salaryMin           Float
+  salaryMax           Float
+  employmentType      String
+  benefits            String
+  applicationDeadline DateTime
+  contactInfo         String
+  applications        Application[]
+}
+
+model InterviewFlow {
+  id            Int             @id @default(autoincrement())
+  description   String
+  interviewSteps InterviewStep[]
+  positions     Position[]
+}
+
+model InterviewStep {
+  id                Int             @id @default(autoincrement())
+  interviewFlowId   Int
+  interviewFlow     InterviewFlow  @relation(fields: [interviewFlowId], references: [id])
+  interviewTypeId   Int
+  interviewType     InterviewType  @relation(fields: [interviewTypeId], references: [id])
+  name              String
+  orderIndex        Int
+  interviews        Interview[]
+}
+
+model InterviewType {
+  id              Int             @id @default(autoincrement())
+  name            String
+  description     String
+  interviewSteps  InterviewStep[]
+}
+
+model Application {
+  id             Int          @id @default(autoincrement())
+  positionId     Int
+  position       Position     @relation(fields: [positionId], references: [id])
+  candidateId    Int
+  candidate      Candidate    @relation(fields: [candidateId], references: [id])
+  applicationDate DateTime
+  status         String
+  notes          String
+  interviews     Interview[]
+}
+
+model Interview {
+  id                Int          @id @default(autoincrement())
+  applicationId     Int
+  application       Application  @relation(fields: [applicationId], references: [id])
+  interviewStepId   Int
+  interviewStep     InterviewStep @relation(fields: [interviewStepId], references: [id])
+  employeeId        Int
+  employee          Employee     @relation(fields: [employeeId], references: [id])
+  interviewDate     DateTime
+  result            String
+  score             Int
+  notes             String
 }
