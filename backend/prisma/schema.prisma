@@ -20,10 +20,15 @@ model Candidate {
   lastName          String            @db.VarChar(100)
   email             String            @unique @db.VarChar(255)
   phone             String?           @db.VarChar(15)
-  address           String?           @db.VarChar(100)
   educations        Education[]
   workExperiences   WorkExperience[]
   resumes           Resume[]
+  addresses         CandidateAddress[]
+  applications      Application[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([email])
 }
 
 model Education {
@@ -34,6 +39,10 @@ model Education {
   endDate       DateTime?
   candidateId   Int
   candidate     Candidate @relation(fields: [candidateId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([candidateId])
 }
 
 model WorkExperience {
@@ -45,6 +54,10 @@ model WorkExperience {
   endDate     DateTime?
   candidateId Int
   candidate   Candidate @relation(fields: [candidateId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([candidateId])
 }
 
 model Resume {
@@ -54,4 +67,275 @@ model Resume {
   uploadDate  DateTime
   candidateId Int
   candidate   Candidate @relation(fields: [candidateId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([candidateId])
+}
+
+model Company {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(255)
+  employees   Employee[]
+  positions   Position[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Employee {
+  id          Int        @id @default(autoincrement())
+  companyId   Int
+  name        String     @db.VarChar(255)
+  email       String     @db.VarChar(255)
+  isActive    Boolean
+  company     Company    @relation(fields: [companyId], references: [id])
+  interviews  Interview[]
+  roles       EmployeeRole[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([companyId])
+}
+
+model Role {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(100)
+  employees   EmployeeRole[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model EmployeeRole {
+  employeeId  Int
+  roleId      Int
+  employee    Employee   @relation(fields: [employeeId], references: [id])
+  role        Role       @relation(fields: [roleId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@id([employeeId, roleId])
+}
+
+model InterviewFlow {
+  id          Int        @id @default(autoincrement())
+  descriptionId Int
+  description Description @relation(fields: [descriptionId], references: [id])
+  positions   Position[]
+  steps       InterviewStep[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([descriptionId])
+}
+
+model PositionStatus {
+  id          Int        @id @default(autoincrement())
+  status      String     @db.VarChar(50)
+  positions   Position[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model EmploymentType {
+  id          Int        @id @default(autoincrement())
+  type        String     @db.VarChar(50)
+  positions   Position[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model SalaryRange {
+  id          Int        @id @default(autoincrement())
+  salaryMin   Float
+  salaryMax   Float
+  positions   Position[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Position {
+  id          Int        @id @default(autoincrement())
+  companyId   Int
+  interviewFlowId Int
+  statusId    Int
+  employmentTypeId Int
+  title       String     @db.VarChar(255)
+  descriptionId Int
+  isVisible   Boolean
+  salaryRangeId Int
+  applicationDeadline DateTime?
+  contactInfo String?    @db.VarChar(255)
+  company     Company    @relation(fields: [companyId], references: [id])
+  interviewFlow InterviewFlow @relation(fields: [interviewFlowId], references: [id])
+  status      PositionStatus @relation(fields: [statusId], references: [id])
+  employmentType EmploymentType @relation(fields: [employmentTypeId], references: [id])
+  description Description @relation(fields: [descriptionId], references: [id])
+  salaryRange SalaryRange @relation(fields: [salaryRangeId], references: [id])
+  requirements PositionRequirement[]
+  responsibilities PositionResponsibility[]
+  benefits    PositionBenefit[]
+  applications Application[]
+  locations   PositionLocation[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([companyId])
+  @@index([interviewFlowId])
+  @@index([descriptionId])
+  @@index([salaryRangeId])
+}
+
+model PositionRequirement {
+  id          Int        @id @default(autoincrement())
+  positionId  Int
+  requirement String     @db.VarChar(255)
+  position    Position   @relation(fields: [positionId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([positionId])
+}
+
+model PositionResponsibility {
+  id          Int        @id @default(autoincrement())
+  positionId  Int
+  responsibility String   @db.VarChar(255)
+  position    Position   @relation(fields: [positionId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([positionId])
+}
+
+model PositionBenefit {
+  id          Int        @id @default(autoincrement())
+  positionId  Int
+  benefit     String     @db.VarChar(255)
+  position    Position   @relation(fields: [positionId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([positionId])
+}
+
+model ApplicationStatus {
+  id          Int        @id @default(autoincrement())
+  status      String     @db.VarChar(50)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  applications Application[]
+}
+
+model InterviewStep {
+  id            Int          @id @default(autoincrement())
+  descriptionId Int
+  description   Description  @relation(fields: [descriptionId], references: [id])
+  interviewFlowId Int
+  interviewFlow InterviewFlow @relation(fields: [interviewFlowId], references: [id])
+  interviews    Interview[]
+  interviewTypeId Int? // Agrega esta línea
+  interviewType InterviewType? @relation(fields: [interviewTypeId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([descriptionId])
+  @@index([interviewFlowId])
+}
+
+model Interview {
+  id          Int        @id @default(autoincrement())
+  applicationId Int
+  interviewStepId Int
+  employeeId   Int
+  interviewDate DateTime
+  resultId    Int
+  score       Int
+  notesId     Int
+  application Application @relation(fields: [applicationId], references: [id])
+  interviewStep InterviewStep @relation(fields: [interviewStepId], references: [id])
+  employee    Employee    @relation(fields: [employeeId], references: [id])
+  result      InterviewResult @relation(fields: [resultId], references: [id])
+  notes       Description @relation(fields: [notesId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([applicationId])
+  @@index([interviewStepId])
+  @@index([employeeId])
+  @@index([resultId])
+  @@index([notesId])
+}
+
+model InterviewResult {
+  id          Int        @id @default(autoincrement())
+  result      String     @db.VarChar(50)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  interviews  Interview[]
+}
+
+model CandidateAddress {
+  id          Int        @id @default(autoincrement())
+  candidateId Int
+  address     String     @db.VarChar(100)
+  candidate   Candidate  @relation(fields: [candidateId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([candidateId])
+}
+
+model InterviewType {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(255)
+  descriptionId Int
+  description Description @relation(fields: [descriptionId], references: [id])
+  steps       InterviewStep[] // Asegúrate de que esta línea esté presente
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model PositionLocation {
+  id          Int        @id @default(autoincrement())
+  positionId  Int
+  location    String     @db.VarChar(100)
+  position    Position   @relation(fields: [positionId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([positionId])
+}
+
+model Application {
+  id          Int        @id @default(autoincrement())
+  positionId  Int
+  candidateId Int
+  statusId    Int
+  applicationDate DateTime
+  notesId     Int
+  position    Position   @relation(fields: [positionId], references: [id])
+  candidate   Candidate  @relation(fields: [candidateId], references: [id])
+  status      ApplicationStatus @relation(fields: [statusId], references: [id])
+  notes       Description @relation(fields: [notesId], references: [id])
+  interviews  Interview[] // Agrega esta línea
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([positionId])
+  @@index([candidateId])
+  @@index([statusId])
+  @@index([notesId])
+}
+
+model Description {
+  id          Int        @id @default(autoincrement())
+  description String
+  interviewFlows InterviewFlow[]
+  interviewTypes InterviewType[]
+  positions   Position[]
+  applications Application[]
+  interviews  Interview[]
+  interviewSteps InterviewStep[] // Agrega esta línea
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
