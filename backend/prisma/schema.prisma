@@ -58,16 +58,17 @@ model Resume {
 }
 
 model Company {
-  id           Int          @id @default(autoincrement())
-  name         String
-  employees    Employee[]
-  positions    Position[]
+  id                 Int        @id @default(autoincrement())
+  name               String
+  companyDescription String?
+  employees          Employee[]
+  positions          Position[]
 }
 
 model Employee {
   id           Int          @id @default(autoincrement())
   companyId    Int
-  company      Company      @relation(fields: [companyId], references: [id])
+  company      Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
   name         String
   email        String       @unique
   role         String
@@ -76,27 +77,26 @@ model Employee {
 }
 
 model Position {
-  id              Int             @id @default(autoincrement())
-  companyId       Int
-  company         Company         @relation(fields: [companyId], references: [id])
-  interviewFlowId Int
-  interviewFlow   InterviewFlow   @relation(fields: [interviewFlowId], references: [id])
-  title           String
-  description     String
-  status          String
-  isVisible       Boolean
-  location        String
-  jobDescription  String
-  requirements     String
-  responsibilities String
-  salaryMin       Float
-  salaryMax       Float
-  employmentType  String
-  benefits        String
-  companyDescription String
+  id                  Int             @id @default(autoincrement())
+  companyId           Int
+  company             Company         @relation(fields: [companyId], references: [id])
+  interviewFlowId     Int
+  interviewFlow       InterviewFlow   @relation(fields: [interviewFlowId], references: [id])
+  title               String
+  description         String
+  status              String
+  isVisible           Boolean
+  location            String
+  jobDescription      String
+  requirements        String
+  responsibilities    String
+  salaryMin           Float
+  salaryMax           Float
+  employmentType      String
+  benefits            String
   applicationDeadline DateTime
-  contactInfo     String
-  applications    Application[]
+  contactInfo         String
+  applications        Application[]
 }
 
 model InterviewFlow {
